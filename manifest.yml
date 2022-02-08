@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: testapp
+  name: testapp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: testapp
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: testapp
+    spec:
+      containers:
+      - image: nginx
+        name: testapp
+        resources: {}
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: testapp-service
+  labels:
+    app: testapp-service
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: testapp
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    alb.ingress.kubernetes.io/target-type: instance
+    alb.ingress.kubernetes.io/group.name: my-group
+    kubernetes.io/ingress.class: alb
+  labels:
+    app: testapp
+  name: testapp-ingress
+  namespace: default
+spec:
+  rules:
+  - host: "testapp.envestnet.com"
+    http:
+      paths:
+      - backend:
+          service:
+            name: testapp-service
+            port:
+              number: 80
+        path: /*
+        pathType: ImplementationSpecific
+
+    
+    
+    
